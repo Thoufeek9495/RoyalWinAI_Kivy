@@ -1,43 +1,53 @@
 name: Build APK with Buildozer
 
 on:
-  push:
-    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04  # ✅ Use stable Ubuntu version
+    runs-on: ubuntu-22.04
 
     steps:
-      - name: 📥 Checkout Code
-        uses: actions/checkout@v3
+    - name: Checkout Code
+      uses: actions/checkout@v3
 
-      - name: 🐍 Set up Python 3.10
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.10  # ✅ Don't use 3.1
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
 
-      - name: 🧰 Install Dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y build-essential git zip unzip openjdk-17-jdk python3-pip libffi-dev libssl-dev
-          pip install --upgrade pip
-          pip install cython virtualenv
+    - name: Install System Dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y \
+          build-essential \
+          git \
+          zip \
+          unzip \
+          openjdk-17-jdk \
+          python3-pip \
+          libffi-dev \
+          libssl-dev \
+          libncurses5 \
+          libstdc++6
 
-      - name: ⚙️ Install Buildozer
-        run: |
-          pip install buildozer
+    - name: Install Buildozer
+      run: |
+        pip install --upgrade pip
+        pip install cython virtualenv buildozer
 
-      - name: 📦 Initialize Buildozer (if missing)
-        run: |
-          if [ ! -f buildozer.spec ]; then buildozer init; fi
+    - name: Initialize Buildozer Spec (if not present)
+      run: |
+        if [ ! -f buildozer.spec ]; then
+          buildozer init
+        fi
 
-      - name: 🏗️ Build APK
-        run: |
-          buildozer android debug
+    - name: Build APK
+      run: |
+        buildozer android debug
 
-      - name: 📤 Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: RoyalWinAI-APK
-          path: bin/*.apk
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: RoyalWinAI-APK
+        path: bin/*.apk
