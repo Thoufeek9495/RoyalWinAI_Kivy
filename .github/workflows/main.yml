@@ -7,9 +7,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -21,20 +21,30 @@ jobs:
           sudo apt update
           sudo apt install -y build-essential git zip unzip openjdk-17-jdk python3-pip
           pip install --upgrade pip
-          pip install buildozer Cython virtualenv
+          pip install buildozer cython virtualenv
 
-      - name: Initialize Buildozer
+      - name: Create buildozer.spec
         run: |
-          cd ${{ github.workspace }}
-          buildozer init || true
+          echo "[app]" > buildozer.spec
+          echo "title = RoyalWinAI" >> buildozer.spec
+          echo "package.name = royalwinai" >> buildozer.spec
+          echo "package.domain = org.royalwin" >> buildozer.spec
+          echo "source.dir = ." >> buildozer.spec
+          echo "source.include_exts = py,png,jpg,kv,atlas" >> buildozer.spec
+          echo "version = 1.0" >> buildozer.spec
+          echo "requirements = python3,kivy" >> buildozer.spec
+          echo "orientation = portrait" >> buildozer.spec
+          echo "osx.kivy_version = 2.1.0" >> buildozer.spec
+          echo "[buildozer]" >> buildozer.spec
+          echo "log_level = 2" >> buildozer.spec
 
       - name: Build APK
         run: |
-          cd ${{ github.workspace }}
+          buildozer init || true
           buildozer android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v3
         with:
-          name: royalwin-ai-apk
+          name: RoyalWinAI-APK
           path: bin/*.apk
